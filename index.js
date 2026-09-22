@@ -1,6 +1,6 @@
 const http = require('http');
 const {handleRequest}= require('./helper/handleReqRes')
-console.log(handleRequest)
+
 const app = {};
 
 app.config = {
