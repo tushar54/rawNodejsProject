@@ -5,8 +5,8 @@ const data = require('./lib/data')
 const app = {};
 
 
-data.create('test','newFile',{name:'Bangladesh',language:'Bangla'},(err)=>{
-    console.log('error was',err);
+data.delete('test','newFile',  (err)=>{
+    console.log(err);
 })
 
 app.createServer = () => {
