@@ -1,5 +1,5 @@
 const handler={};
-handler.sampleHandler=(requestProperty,callback)=>{
+handler.sampleHandler=(requestProperties,callback)=>{
     // console.log(requestProperty);
     
     callback( 200, {
