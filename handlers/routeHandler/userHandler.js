@@ -18,7 +18,7 @@ handler._users = {}
 
 handler._users.get = (requestProperties, callback) => {
     const mobile = typeof (requestProperties.queryStringObject.mobile) === 'string' && requestProperties.queryStringObject.mobile.trim().length === 11 ? requestProperties.queryStringObject.mobile : false;
-    if (mobile) {
+    if (mobile) { 
         data.read('users', mobile, (err, u) => {
             const user = { ...parsedData(u) };
             if (!err && user) {

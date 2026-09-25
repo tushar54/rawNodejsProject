@@ -21,11 +21,32 @@ handler.tokenHandler = (requestProperties, callback) => {
 handler._token = {}
 
 handler._token.get = (requestProperties, callback) => {
+    const id = typeof (requestProperties.queryStringObject.id) === 'string' && requestProperties.queryStringObject.id.trim().length === 21 ? requestProperties.queryStringObject.id : false;
+    console.log(requestProperties.queryStringObject.id)
+    console.log(id)
+    if (id) {
+        data.read('tokens', id, (err, tokenData) => {
+            const token = { ...parsedData(tokenData) };
+            if (!err && token) {
 
+                callback(200, token)
+            }
+            else {
+                callback(404, {
+                    'error': 'error hoiye geche! token pawa jai nai.'
+                })
+            }
+        })
+    }
+    else {
+        callback(404, {
+            'error': 'requested token was not found!'
+        })
+    }
 }
 handler._token.post = (requestProperties, callback) => {
     const mobile = typeof (requestProperties.body.mobile) === 'string' && requestProperties.body.mobile.trim().length === 11 ? requestProperties.body.mobile : false;
-     const password = typeof (requestProperties.body.password) === 'string' && requestProperties.body.password.trim().length > 0 ? requestProperties.body.password : false;
+    const password = typeof (requestProperties.body.password) === 'string' && requestProperties.body.password.trim().length > 0 ? requestProperties.body.password : false;
 
 
     if (mobile && password) {
@@ -34,23 +55,24 @@ handler._token.post = (requestProperties, callback) => {
             let = hashedPassword = hash(password);
             console.log(hashedPassword)
             if (hashedPassword === parsedData(userData).password) {
-                
+
                 let tokenId = createRandomString(20)
+                console.log(tokenId)
                 let expires = Date.now() + 60 * 60 * 1000
                 let tokenObject = {
                     mobile,
-                    'id': tokenId,
+                    id: tokenId,
                     expires
                 }
-                data.create('tokens',tokenId,tokenObject,(err1)=>{
-                    if(!err1){
-                        callback(200,{
+                data.create('tokens', tokenId, tokenObject, (err1) => {
+                    if (!err1) {
+                        callback(200, {
                             tokenObject
                         })
                     }
-                    else{
-                        callback(500,{
-                            error:'this is server side error!'
+                    else {
+                        callback(500, {
+                            error: 'this is server side error!'
                         })
                     }
                 })
@@ -70,7 +92,43 @@ handler._token.post = (requestProperties, callback) => {
     }
 }
 handler._token.put = (requestProperties, callback) => {
+    const id = typeof requestProperties.body.id === 'string' && requestProperties.body.id.trim().length === 21 ? requestProperties.body.id : false;
 
+    const extend = typeof requestProperties.body.extend === 'boolean' && requestProperties.body.extend === true ? true : false;
+    console.log(id,extend)
+    if (id && extend) {
+        data.read('tokens',id,(err1,tokenData)=>{
+            let tokenObject = parsedData(tokenData)
+            if(tokenObject.expires > Date.now()){
+                tokenObject.expires=Date.now()* 60 *60 *1000;
+                data.update('tokens',id,tokenObject,(err2)=>{
+
+                    if(!err2){
+                        callback(200,{
+                            'message':'Token is updated'
+                        })
+                    }
+                    else{
+                        callback(500,{
+                            error:'there was a server side error!'
+                        })
+                    }
+                }) 
+            }
+            else{
+                callback(400,{
+                    error:'token already expired!'
+                })
+            }
+        })
+    }
+    else {
+        callback(400,
+            {
+                error: 'there was a problem in your request!'
+            }
+        )
+    }
 }
 handler._token.delete = (requestProperties, callback) => {
 
