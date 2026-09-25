@@ -45,7 +45,7 @@ handler._users.post = (requestProperties, callback) => {
     const mobile = typeof (requestProperties.body.mobile) === 'string' && requestProperties.body.mobile.trim().length === 11 ? requestProperties.body.mobile : false;
     const password = typeof (requestProperties.body.password) === 'string' && requestProperties.body.password.trim().length > 0 ? requestProperties.body.password : false;
     const toAggrement = typeof (requestProperties.body.toAggrement) === 'boolean' ? requestProperties.body.password : false;
-
+    // console.log(mobile,password)
     if (firstName && lastName && mobile && password && toAggrement) {
         data.read('users', mobile, (err, user) => {
             if (err) {
@@ -89,7 +89,7 @@ handler._users.put = (requestProperties, callback) => {
     if (mobile) {
         if (firstName || lastName || password) {
             data.read('users', mobile, (err, uData) => {
-                const userData = {...parsedData(uData)}
+                const userData = { ...parsedData(uData) }
                 if (!err && userData) {
                     if (firstName) {
                         userData.firstName = firstName;
@@ -100,15 +100,15 @@ handler._users.put = (requestProperties, callback) => {
                     if (password) {
                         userData.password = hash(password)
                     }
-                    data.update('users', mobile, userData, (err)=> {
-                        if(!err){
-                            callback(200,{
-                                message:'user was updated successfully!'
+                    data.update('users', mobile, userData, (err) => {
+                        if (!err) {
+                            callback(200, {
+                                message: 'user was updated successfully!'
                             })
                         }
-                        else{
-                            callback(500,{
-                                error:' There was a problem in the server side!'
+                        else {
+                            callback(500, {
+                                error: ' There was a problem in the server side!'
                             })
                         }
                     }
@@ -136,6 +136,36 @@ handler._users.put = (requestProperties, callback) => {
 
 }
 handler._users.delete = (requestProperties, callback) => {
+    const mobile = typeof (requestProperties.queryStringObject.mobile) === 'string' && requestProperties.queryStringObject.mobile.trim().length === 11 ? requestProperties.queryStringObject.mobile : false;
+
+    if (mobile) {
+        data.read('users', mobile, (err, userData) => {
+            if (!err&& userData) {
+                data.delete('users',mobile, (err)=>{
+                    if(!err){
+                        callback(200,{
+                            message:'user was successfully deleted'
+                        })
+                    }
+                    else{
+                        callback(500,{
+                            error:'There was a server side error.'
+                        })
+                    }
+                })
+            }
+            else {
+                callback(500, {
+                    error: ' There was a problem in your request'
+                })
+            }
+        })
+    }
+    else {
+        callback(400, {
+            error: ' There was a problem in your request'
+        })
+    }
 }
 
 

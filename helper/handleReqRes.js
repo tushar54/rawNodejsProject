@@ -12,7 +12,7 @@ const handle = {}
 
 
 handle.handleRequest = (req, res) => {
-    console.log('tushar')
+    // console.log('tushar')
     const parseUrl = url.parse(req.url, true)
     const path = parseUrl.pathname;
     const trimedPath = path.replace(/^\/+|\/+&/g, '')
@@ -27,7 +27,7 @@ handle.handleRequest = (req, res) => {
         queryStringObject,
         headerObject,
     }
-
+    
     const decoder = new StringDecoder('utf-8')
     let realData = '';
     // console.log( routes[trimedPath])
@@ -42,6 +42,7 @@ handle.handleRequest = (req, res) => {
     req.on('end', () => {
         realData += decoder.end()
         requestProperties.body = parsedData(realData)
+        console.log(realData)
 
        choseHandler(requestProperties, (statusCode, payload) => {
         statusCode = typeof (statusCode) === 'number' ? statusCode : 500;
