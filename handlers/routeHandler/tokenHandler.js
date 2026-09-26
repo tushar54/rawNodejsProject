@@ -163,6 +163,7 @@ handler._token.delete = (requestProperties, callback) => {
 }
 
 handler._token.verify = (id,mobile,callback)=>{
+  
 data.read('tokens',id,(err,tokenData)=>{
 
     if(!err&&tokenData){

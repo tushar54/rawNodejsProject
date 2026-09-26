@@ -1,8 +1,3 @@
-const app={
-    sample:'simple',
-    work:'formula'
-}
-
-const tushar= 'work';
-
-// console.log(app[tushar]);
+const v= 10;
+const t= v%3
+console.log(t)
