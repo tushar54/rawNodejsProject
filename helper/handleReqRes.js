@@ -42,7 +42,7 @@ handle.handleRequest = (req, res) => {
     req.on('end', () => {
         realData += decoder.end()
         requestProperties.body = parsedData(realData)
-        console.log(requestProperties.queryStringObject.id)
+        // console.log(requestProperties.queryStringObject.id)
 
        choseHandler(requestProperties, (statusCode, payload) => {
         statusCode = typeof (statusCode) === 'number' ? statusCode : 500;

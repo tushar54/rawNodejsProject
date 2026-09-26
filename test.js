@@ -5,4 +5,4 @@ const app={
 
 const tushar= 'work';
 
-console.log(app[tushar]);
+// console.log(app[tushar]);

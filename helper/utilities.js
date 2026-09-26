@@ -22,7 +22,7 @@ utilities.hash = (str) => {
 utilities.createRandomString = (strLength) => {
     let length = strLength;
     length = typeof strLength === 'number' && strLength > 0 ? strLength : false;
-    console.log(strLength)
+    // console.log(strLength)
     if (length) {
         let possibleChar = 'abcdefghijklmnopqrstuvwxyz1234567890'
         let output = ''
