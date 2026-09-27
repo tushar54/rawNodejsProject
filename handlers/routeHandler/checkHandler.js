@@ -30,18 +30,18 @@ handler.check.get = (requestProperties, callback) => {
         data.read('checks', id, (err, checkData) => {
             if (!err && checkData) {
                 let token = typeof (requestProperties.headerObject.token) === 'string' ? requestProperties.headerObject.token : false;
-                console.log(token,id)
+                console.log(token, id)
                 tokenHandler._token.verify(token, parsedData(checkData).userMobile, (tokenIsValid) => {
-                            if (tokenIsValid) {
-                                console.log(parsedData(checkData))
-                                callback(200,parsedData(checkData))
-                            }
-                            else{
-                                callback(403,{
-                                    error: "authentication failed"
-                                })
-                            }
-                        
+                    if (tokenIsValid) {
+                        console.log(parsedData(checkData))
+                        callback(200, parsedData(checkData))
+                    }
+                    else {
+                        callback(403, {
+                            error: "authentication failed"
+                        })
+                    }
+
                 })
             }
             else {
@@ -160,12 +160,160 @@ handler.check.post = (requestProperties, callback) => {
 
 handler.check.put = (requestProperties, callback) => {
 
+    const id = typeof requestProperties.body.id === 'string' && requestProperties.body.id.trim().length === 21 ? requestProperties.body.id : false;
+
+    let protocol = typeof (requestProperties.body.protocol) === 'string' && ['http', 'https'].indexOf(requestProperties.body.protocol) > -1 ? requestProperties.body.protocol : false;
+
+    let url = typeof (requestProperties.body.url) === 'string' && requestProperties.body.url.trim().length > 0 ? requestProperties.body.url : false;
+
+    let method = typeof (requestProperties.body.method) === 'string' && ['GET', 'PUT', 'POST', 'DELETE'].indexOf(requestProperties.body.method) > -1 ? requestProperties.body.method : false;
+
+    let success = typeof (requestProperties.body.success) === 'object' && requestProperties.body.success instanceof Array ? requestProperties.body.success : false;
+
+    let timeOutSecond = typeof (requestProperties.body.timeOutSecond) === 'number' && requestProperties.body.timeOutSecond % 2 === 0 && requestProperties.body.timeOutSecond >= 1 && requestProperties.body.timeOutSecond <= 5 ? requestProperties.body.timeOutSecond : false;
+    console.log(id)
+    if (id) {
+        if (protocol || url || method || success || timeOutSecond) {
+            data.read('checks', id, (err, checkData) => {
+                if (!err && checkData) {
+                    let checkObject = parsedData(checkData)
+                    let token = typeof (requestProperties.headerObject.token) === 'string' ? requestProperties.headerObject.token : false;
+                    tokenHandler._token.verify(token, checkObject.userMobile, (tokenIsValid) => {
+                        console.log(tokenIsValid)
+                        if (tokenIsValid) {
+                            if (protocol) {
+                                checkObject.protocol = protocol
+                            }
+                            if (url) {
+                                checkObject.url = url
+                            }
+                            if (method) {
+                                checkObject.method = method
+                            }
+                            if (success) {
+                                checkObject.success = success
+                            }
+                            if (timeOutSecond) {
+                                checkObject.timeOutSecond = timeOutSecond
+                            }
+
+                            data.update('checks', id, checkObject, (err) => {
+                                if (!err) {
+                                    callback(200, checkObject)
+                                }
+                                else {
+                                    callback(500, {
+                                        error: 'There was a server side error!'
+                                    })
+                                }
+                            })
+                        }
+                        else {
+                            callback(500, {
+                                error: 'Authentication error!'
+                            })
+                        }
+
+                    })
+                }
+                else {
+                    callback(500, {
+                        error: 'This is server side error!'
+                    })
+                }
+            })
+        }
+        else {
+            callback(400, {
+                error: 'You must provide at least one feild to update!'
+            })
+        }
+    }
+    else {
+        callback(400, {
+            error: 'Your request is not valid'
+        })
+    }
 }
 
 
 
 
 handler.check.delete = (requestProperties, callback) => {
+    const id = typeof (requestProperties.queryStringObject.id) === 'string' && requestProperties.queryStringObject.id.trim().length === 21 ? requestProperties.queryStringObject.id : false;
+
+
+    if (id) {
+        data.read('checks', id, (err, checkData) => {
+            if (!err && checkData) {
+                let token = typeof (requestProperties.headerObject.token) === 'string' ? requestProperties.headerObject.token : false;
+                console.log(token, id)
+                tokenHandler._token.verify(token, parsedData(checkData).userMobile, (tokenIsValid) => {
+                    if (tokenIsValid) {
+                        data.delete('checks', id, (err) => {
+                            if (!err) {
+                                data.read('users', parsedData(checkData).userMobile, (err, userData) => {
+                                    let userObject = parsedData(userData);
+
+                                    if (!err && userData) {
+                                        let userChecks = typeof (userObject.checks) === 'object' && userObject.checks instanceof Array ? userObject.checks : []
+
+                                        let checkPosition = userChecks.indexOf(id)
+                                        if (checkPosition > -1) {
+                                            userChecks.splice(checkPosition, 1)
+                                            userObject.checks = userChecks
+
+                                            data.update('users',userObject.mobile,userObject,(err)=>{
+                                                if(!err){
+                                                    callback(200)
+                                                }   
+                                                else{
+                                                    callback(500,{
+                                                        error:'this is server side error!'
+                                                    })
+                                                }
+                                            })
+                                        }
+                                        else {
+                                            callback(400,{
+                                                error:'The check id that you are trying to remove is not found in user!'
+                                            })
+                                        }
+                                    }
+                                    else {
+                                        callback(500, {
+                                            error: "this is a server side error!"
+                                        })
+                                    }
+                                })
+                            }
+                            else {
+                                callback(500, {
+                                    error: 'this is server side error!'
+                                })
+                            }
+                        })
+                    }
+                    else {
+                        callback(403, {
+                            error: "authentication failed"
+                        })
+                    }
+
+                })
+            }
+            else {
+                callback(500, {
+                    error: 'there is no user data'
+                })
+            }
+        })
+    }
+    else {
+        callback(400, {
+            error: 'you have a problem in your request'
+        })
+    }
 
 }
 
