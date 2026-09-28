@@ -9,7 +9,7 @@ notifications.sendTwilioSms = (mobile, msg, callback) => {
     const userMsg = typeof (msg) === 'string' && msg.trim().length > 0 && msg.trim().length <= 1600 ? msg.trim() : false
 
     if (userMobile && userMsg) {
-        const payload = {
+        const a = {
             From: twilio.fromPhone,
             To: `+88${userMobile}`,
             Body: userMsg
